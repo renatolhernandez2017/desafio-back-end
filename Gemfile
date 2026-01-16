@@ -42,13 +42,13 @@ group :development, :test do
   gem "faker"
   gem "parallel_tests"
   gem "pry-rails"
-  gem "rspec-rails"
 end
 
 group :test do
   gem "capybara"
   gem "rubocop-rspec", require: false
-  gem "shoulda-matchers"
+  gem "rspec-rails"
+  gem "shoulda-matchers", "~> 5.0"
   gem "simplecov"
   gem "webmock"
 end
