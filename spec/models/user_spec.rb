@@ -1,5 +1,11 @@
-RSpec.describe User do
-  describe "associations" do
-    it { is_expected.to belong_to :account }
-  end
+require 'rails_helper'
+
+RSpec.describe User, type: :model do
+  subject { build(:user) }
+
+  it { should validate_presence_of(:email) }
+  it { should validate_uniqueness_of(:email).case_insensitive }
+
+  it { should have_many(:entity_users) }
+  it { should have_many(:entities).through(:entity_users) }
 end

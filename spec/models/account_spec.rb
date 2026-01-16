@@ -1,5 +1,9 @@
 RSpec.describe Account do
   describe "associations" do
-    it { is_expected.to have_many :users }
+    it { is_expected.to have_many(:entities) }
+  end
+
+  describe "validations" do
+    it { is_expected.to validate_presence_of(:name) }
   end
 end
