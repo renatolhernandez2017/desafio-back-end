@@ -24,8 +24,14 @@ RUN bundle install
 # Copia o restante da aplicação
 COPY . .
 
+# Copia entrypoint
+COPY entrypoint.sh /usr/bin/entrypoint.sh
+RUN chmod +x /usr/bin/entrypoint.sh
+
 # Expõe a porta padrão do Rails
 EXPOSE 3000
+
+ENTRYPOINT ["entrypoint.sh"]
 
 # Comando padrão
 CMD ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
