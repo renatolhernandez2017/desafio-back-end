@@ -2,20 +2,19 @@ module Api
   module V1
     class RegistrationsController < ApplicationController
       def create
-        result = CreateRegistration.call(create_params)
-
-        if result.success?
-          render json: { message: "Registro realizado com sucesso" }, status: :created
-        else
-          render json: { error: result.error }, status: :unprocessable_entity
-        end
+        CreateAccount.new(create_params).call
+        render json: { message: 'Registro realizado com sucesso' }, status: :created
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { error: e.message }, status: :unprocessable_entity
       end
 
       private
 
       def create_params
         params.require(:account)
-              .permit(:name, :from_partner, :many_partners, users: %i[email first_name last_name phone])
+              .permit(:name, :from_partner, :many_partners,
+                entities: [:name, { users: %i[email first_name last_name phone] }]
+              )
       end
     end
   end
