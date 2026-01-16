@@ -1,28 +1,19 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  pool: <%= ENV['RAILS_MAX_THREADS'] || 5 %>
-  url: <%= ENV['DATABASE_URL'] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "postgres") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "postgres") %>
 
-development: &development
+development:
   <<: *default
-  database: desafio_development
-  username: postgres
-  password: desafiopass
-  host: 127.0.0.1
+  database: <%= ENV.fetch("DATABASE_NAME", "app_development") %>
 
 test:
   <<: *default
-  database: account_test<%= ENV['TEST_ENV_NUMBER'] %>
-  username: postgres
-  password: desafiopass
-  host: 127.0.0.1
-
-  profile:
-    <<: *development
-
-sandbox:
-  <<: *default
+  database: app_test
 
 production:
   <<: *default
+  database: app_production
