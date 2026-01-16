@@ -1,50 +1,87 @@
+require 'rails_helper'
+
 RSpec.describe CreateAccount do
-  describe "#call" do
-    subject(:call) { described_class.call(payload) }
+  subject(:service) { described_class.new(params) }
 
-    context "when account is created" do
-      let(:payload) do
+  let(:params) do
+    {
+      name: 'Empresa Z',
+      entities: [
         {
-          name: Faker::Company.name,
+          name: 'Empresa A',
           users: [
             {
-              first_name: Faker::Name.first_name,
-              last_name: Faker::Name.last_name,
-              email: Faker::Internet.email,
-              phone: "(11) 97111-0101",
-            },
-          ],
-        }
-      end
-      let(:expected_result) { ApplicationService::Result.new(true, Account.last, nil) }
-
-      it { is_expected.to eql(expected_result) }
-    end
-
-    context "when account is not created" do
-      let(:payload) do
+              email: 'teste@empresa.com',
+              first_name: 'Teste',
+              last_name: 'Silva',
+              phone: '62999999999'
+            }
+          ]
+        },
         {
-          name: "",
+          name: 'Empresa B',
           users: [
             {
-              first_name: Faker::Name.first_name,
-              last_name: Faker::Name.last_name,
-              email: Faker::Internet.email,
-              phone: "(11) 97111-0101",
-            },
-          ],
+              email: 'teste@empresa.com',
+              first_name: 'Teste',
+              last_name: 'Silva',
+              phone: '62999999999'
+            }
+          ]
         }
-      end
-      let(:expected_result) { ApplicationService::Result.new(false, nil, "Name can't be blank") }
+      ]
+    }
+  end
 
-      it { is_expected.to eql(expected_result) }
+  describe '#call' do
+    it 'cria conta, entities e usuários corretamente' do
+      expect {
+        described_class.new(params).call
+      }.to change(Account, :count).by(1)
+        .and change(Entity, :count).by(2)
+        .and change(User, :count).by(1)
     end
 
-    context "when payload is invalid" do
-      let(:payload) { {} }
-      let(:expected_result) { ApplicationService::Result.new(false, nil, "Account is not valid") }
+    it 'não duplica usuário ao associar a múltiplas entities' do
+      described_class.new(params).call
 
-      it { is_expected.to eql(expected_result) }
+      user = User.find_by(email: 'teste@empresa.com')
+
+      expect(user.entities.pluck(:name)).to contain_exactly(
+        'Empresa A',
+        'Empresa B'
+      )
+    end
+
+    it 'não quebra ao receber a mesma requisição duas vezes' do
+      service = described_class.new(params)
+
+      service.call
+      expect { service.call }.not_to change(User, :count)
+    end
+
+    it 'faz rollback se uma entity falhar' do
+      invalid_params = params.deep_dup
+      invalid_params[:entities][0][:name] = nil
+
+      expect {
+        described_class.new(invalid_params).call
+      }.to raise_error(ActiveRecord::RecordInvalid)
+      .and change(Account, :count).by(0)
+      .and change(Entity, :count).by(0)
+      .and change(User, :count).by(0)
+    end
+
+    it 'faz rollback se um usuário falhar' do
+      invalid_params = params.deep_dup
+      invalid_params[:entities][0][:users][0][:email] = nil
+
+      expect {
+        described_class.new(invalid_params).call
+      }.to raise_error(ActiveRecord::RecordInvalid)
+      .and change(Account, :count).by(0)
+      .and change(Entity, :count).by(0)
+      .and change(User, :count).by(0)
     end
   end
 end
