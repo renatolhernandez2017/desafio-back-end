@@ -2,27 +2,4 @@ pt-BR:
   errors:
     messages:
       record_invalid: "Validação falhou: %{errors}"
-  
-  activerecord:
-    models:
-      account: "Conta"
-      entity: "Entidade"
-      user: "Usuário"
-      entity_user: "Usuário da Entidade"
-    attributes:
-      account:
-        name: "Nome"
-      entity:
-        name: "Nome"
-      user:
-        email: "Email"
-        name: "Nome"
-      entity_user:
-        entity: "Entidade"
-        user: "Usuário"
-    errors:
-      models:
-        account:
-          attributes:
-            name:
-              blank: "Nome não pode estar em branco"
+      blank: "não pode ficar em branco"
